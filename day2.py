@@ -85,6 +85,5 @@ st.altair_chart(sales_line,use_container_width = True)
 st.dataframe(data, use_container_width = True)
 
 
-
 # Bikin 4 kolom berisi sales dari tiap kategori
 # Setiap kolom mewakili region yang berbeda
