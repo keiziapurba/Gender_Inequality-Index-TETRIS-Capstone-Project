@@ -1,11 +1,10 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import plotly.express as px
-from sklearn.impute import KNNImputer
 import warnings
+import plotly.graph_objects as go
+import joblib
 
 
 # Set page config
@@ -346,27 +345,171 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 st.plotly_chart(box_plot, use_container_width=True)
 
 
+
+# Visualisasi Gender Inequality Index by Country
+st.subheader('Gender Inequality Index by Country')
+fig = px.choropleth(df_clean, locations='country', locationmode='country names', color='gii value',
+                    hover_data=['gii value', 'region'], title='Gender Inequality Index by Country',
+                    color_continuous_scale='Viridis')
+
+fig.update_layout(
+    title='Gender Inequality Index by Country',
+    geo=dict(showframe=False, showcoastlines=False, projection_type='equirectangular')
+)
+
+st.plotly_chart(fig)
+
+# Visualisasi Trend of Female and Male Labor Force Participation
+st.subheader('Trend of Female and Male Labor Force Participation')
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=df_clean['country'], y=df_clean['f_labour_force'], mode='lines', name='Female Labor Force'))
+fig.add_trace(go.Scatter(x=df_clean['country'], y=df_clean['m_labour_force'], mode='lines', name='Male Labor Force'))
+fig.update_layout(title='Trend of Female and Male Labor Force Participation',
+                  xaxis_title='Country', yaxis_title='Labor Force Participation')
+st.plotly_chart(fig)
+
+# Keterangan Visualisasi Trend of Female and Male Labor Force Participation
+st.write("Berdasarkan grafik di atas, dapat dilihat bahwa proporsi penduduk usia kerja (usia 15 tahun ke atas) yang terlibat dalam pasar tenaga kerja, baik dengan bekerja atau mencari pekerjaan pada tahun 2021 di dominasi jumlahnya oleh laki-laki. Secara garis besar, dapat dilihat bahwa ada ketimpangan dalam jumlah persentase partisipasi angkatan kerja. Nilai persentase paling rendah dimiliki oleh female labour negara Yemen sebesar 5.9. Sedangkan persentase tertinggi dimiliki oleh male labour negara Qatar sebesar 95.4.")
+
+# Visualisasi Trend of Female and Male Secondary Education Participation
+st.subheader('Trend of Female and Male Secondary Education Participation')
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=df_clean['country'], y=df_clean['f_secondary_edu'], mode='lines', name='Female Secondary Education'))
+fig.add_trace(go.Scatter(x=df_clean['country'], y=df_clean['m_secondary_edu'], mode='lines', name='Male Secondary Education'))
+fig.update_layout(title='Trend of Female and Male Secondary Education Participation',
+                  xaxis_title='Country', yaxis_title='Secondary Education Participation')
+st.plotly_chart(fig)
+
+# Keterangan Visualisasi Trend of Female and Male Secondary Education Participation
+st.write("Berdasarkan grafik di atas, dapat dilihat bahwa secara garis besar di semua negara, perempuan yang memiliki pendidikan menengah (secondary education) jumlahnya lebih sedikit hingga menyamai jumlah laki-laki yang memiliki pendidikan tersebut. Secondary education disini merujuk pada tingkat pendidikan yang berada di antara pendidikan dasar (misalnya, SD atau MI) dan pendidikan tinggi (seperti perguruan tinggi atau universitas). Biasanya, pendidikan menengah mencakup jenjang pendidikan seperti SMP atau MTs, SMA atau MA, dan sejenisnya")
+
+
+
 # Correlation Heatmap
 st.subheader('Correlation Heatmap')
-plt.figure(figsize=(12, 8))
-numeric_columns = df_clean.select_dtypes(include=np.number)
-sns.heatmap(numeric_columns.corr(), annot=True, cmap='coolwarm', linewidths=0.5)
-st.pyplot()
+# Human development
+mapping_hd = {
+    'Low': 0,
+    'Medium': 1,
+    'High': 2,
+    'Very High': 3
+}
+df_clean['human development'] = df_clean['human development'].map(mapping_hd)
+
+columns_to_exclude = ['hdi rank', 'country', 'gii rank', 'region']  # Kolom yang ingin dikecualikan
+
+# Menghapus kolom yang tidak diinginkan dari DataFrame
+# Menghapus kolom yang tidak diinginkan dari DataFrame
+corr_matrix = df_clean.drop(columns=columns_to_exclude).corr()
+
+fig = go.Figure(data=go.Heatmap(
+    z=corr_matrix.values,
+    x=list(corr_matrix.columns),
+    y=list(corr_matrix.index),
+    text=corr_matrix.round(2).values,  # Menambahkan nilai angka ke dalam kotak
+    colorscale='RdBu',
+    zmin=-1,
+    zmax=1,
+    colorbar=dict(title='Correlation')
+))
+
+fig.update_layout(
+    xaxis_tickangle=-55,
+    yaxis_tickangle=0,
+    width=700,
+    height=700,
+    title='Correlation Heatmap'
+)
+
+fig.update_traces(hovertemplate='Correlation: %{text}')  # Menampilkan angka saat dihover
+st.plotly_chart(fig)
+
+# Penjelasan umum
+st.write("Berdasarkan heatmap diatas, ada beberapa fitur target yang memiliki korelasi yang tinggi (>0.7) dengan fitur target human development, diantaranya:")
+
+# Poin 1
+st.write("1. Fitur-fitur yang memiliki hubungan negatif dengan fitur target yang menunjukkan bahwa apabila fitur target nilainya meningkat maka fitur ini nilainya akan menurun:")
+st.write("   - human development dan gii value: -0.86")
+st.write("   - human development dan maternal mortality ratio: -0.88")
+st.write("   - human development dan adolescent birth rate: -0.79")
+st.write("   ***Semakin rendah nilai 3 fitur tersebut (gii value, maternal mortality ratio, adolescent birth rate) maka human development pun akan semakin bagus***")
+
+# Poin 2
+st.write("2. Fitur-fitur yang memiliki hubungan positif dengan fitur target, yang mana sifatnya berbanding lurus. Jika nilai fitur target meningkat, maka nilai fitur tersebut juga akan meningkat:")
+st.write("   - human development dan f_secondary_edu: 0.84")
+st.write("   - human development dan m_secondary_edu: 0.8")
+
 
 # Table
 st.subheader('Data Table')
 st.dataframe(df_clean)
 
 # Data Modeling
-st.subheader('Data Modeling')
-st.write("Coming soon...")
+# Load the saved model
+model = joblib.load('/Users/keiziapurba/random_forest_model.pkl')
+
+# Streamlit App
+
+# Title
+st.title('Gender Inequality Index Prediction')
+
+# Input form
+st.header('Input Features')
+gii_value = st.number_input('GII Value')
+maternal_mortality_ratio = st.number_input('Maternal Mortality Ratio')
+adolescent_birth_rate = st.number_input('Adolescent Birth Rate')
+share_of_seats_in_parliament = st.number_input('Share of Seats in Parliament')
+f_secondary_edu = st.number_input('Female Secondary Education')
+m_secondary_edu = st.number_input('Male Secondary Education')
+f_labour_force = st.number_input('Female Labour Force')
+m_labour_force = st.number_input('Male Labour Force')
+region_east_asia_pacific = st.checkbox('Region: East Asia and the Pacific')
+region_europe_central_asia = st.checkbox('Region: Europe and Central Asia')
+region_latin_america_caribbean = st.checkbox('Region: Latin America and the Caribbean')
+region_middle_east_north_africa = st.checkbox('Region: Middle East and North Africa')
+region_north_america = st.checkbox('Region: North America')
+region_south_asia = st.checkbox('Region: South Asia')
+region_sub_saharan_africa = st.checkbox('Region: Sub-Saharan Africa')
+
+# Prepare input data
+input_data = {
+    'gii value': gii_value,
+    'maternal mortality ratio': maternal_mortality_ratio,
+    'adolescent birth rate': adolescent_birth_rate,
+    'share of seats in parliament': share_of_seats_in_parliament,
+    'f_secondary_edu': f_secondary_edu,
+    'm_secondary_edu': m_secondary_edu,
+    'f_labour_force': f_labour_force,
+    'm_labour_force': m_labour_force,
+    'region_East Asia and the Pacific': region_east_asia_pacific,
+    'region_Europe and Central Asia': region_europe_central_asia,
+    'region_Latin America and the Caribbean': region_latin_america_caribbean,
+    'region_Middle East and North Africa': region_middle_east_north_africa,
+    'region_North America': region_north_america,
+    'region_South Asia': region_south_asia,
+    'region_Sub-Saharan Africa': region_sub_saharan_africa
+}
+
+# Create DataFrame from input data
+input_df = pd.DataFrame(input_data, index=[0])
+
+# Make prediction
+prediction = model.predict(input_df)
+
+# Get prediction label
+prediction_labels = ['Low', 'Medium', 'High', 'Very High']
+prediction_label = prediction_labels[prediction[0]]
+
+# Display the prediction
+st.subheader('Prediction')
+st.write('Predicted Human Development Index:', prediction_label)
 
 # About
 st.sidebar.subheader('About')
 st.sidebar.write('This app is an interactive exploration of the Gender Inequality Index dataset. '
                  'It provides visualizations and insights into various aspects of gender inequality. '
                  'The dataset contains information about different countries and their gender inequality index. '
-                 'For more information, please refer to the [Gender Inequality Index](https://example.com) website.')
+                 'For more information, please refer to the [Gender Inequality Index](https://hdr.undp.org/data-center/thematic-composite-indices/gender-inequality-index#/indicies/GII) website.')
 
 # Footer
 st.sidebar.markdown(
@@ -387,13 +530,7 @@ st.sidebar.markdown(
     </style>
     """
     "<div class='footer'>"
-    "Made with ❤️ by Your Name"
+    "Made with ❤️ by Keizia Purba"
     "</div>",
     unsafe_allow_html=True
 )
-
-
-import os
-
-main_file_path = os.path.abspath(__file__)
-print("Main file path:", main_file_path)
