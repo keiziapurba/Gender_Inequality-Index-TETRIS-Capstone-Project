@@ -57,8 +57,21 @@ df = load_data()
 
 
 # Set sidebar
-st.sidebar.title('Gender Inequality Index')
-st.sidebar.markdown('Explore the Gender Inequality Index dataset')
+st.sidebar.title('Gender Inequality Index 2021')
+st.sidebar.markdown('Explore dataset Gender Inequality Index')
+
+# Table
+st.sidebar.subheader('Data Descriptions')
+st.sidebar.write("- **Gender Inequality Index:** Suatu ukuran komposit yang mencerminkan ketimpangan pencapaian antara perempuan dan laki-laki dalam tiga dimensi: kesehatan reproduksi, pemberdayaan, dan pasar kerja. Skala indeks ini berkisar antara 0, di mana perempuan dan laki-laki memiliki pencapaian yang sama, hingga 1, di mana satu gender memiliki pencapaian yang sangat buruk dalam semua dimensi yang diukur. Lihat Technical Note 4 di http://hdr.undp.org/sites/default/files/hdr2022_technical_notes.pdf untuk detail tentang bagaimana Indeks Ketimpangan Gender dihitung.")
+st.sidebar.write("- **Maternal mortality ratio:** Jumlah kematian akibat penyebab terkait kehamilan per 100.000 kelahiran hidup.")
+st.sidebar.write("- **Adolescent birth rate:** Jumlah kelahiran oleh perempuan usia 15–19 tahun per 1.000 perempuan usia 15–19 tahun.")
+st.sidebar.write("- **Share of seats in parliament:** Proporsi kursi yang dipegang oleh perempuan di parlemen nasional, dinyatakan sebagai persentase dari total kursi. Untuk negara-negara dengan sistem legislatif bikameral, andil kursi dihitung berdasarkan kedua kamar.")
+st.sidebar.write("- **Population with at least some secondary education:** Persentase penduduk usia 25 tahun ke atas yang telah mencapai (namun tidak selalu menyelesaikan) tingkat pendidikan menengah lanjutan.")
+st.sidebar.write("- **Labour force participation rate:** Proporsi penduduk usia kerja (usia 15 tahun ke atas) yang terlibat dalam pasar kerja, baik dengan bekerja maupun mencari pekerjaan, dinyatakan sebagai persentase dari penduduk usia kerja.")
+
+# Table
+st.sidebar.subheader('Data Table')
+st.sidebar.dataframe(df)
 
 # Data Understanding
 st.sidebar.subheader('Data Understanding')
@@ -88,8 +101,24 @@ df_clean = df.dropna()
 df_clean[['gii rank', 'maternal mortality ratio']] = df_clean[['gii rank', 'maternal mortality ratio']].astype(int)
 
 # Main content
-st.title('Gender Inequality Index')
-st.subheader('Exploratory Data Analysis')
+st.title('Gender Gap: Are We Stuck in the Past?')
+
+'\n'
+'\n'
+
+st.subheader('Apa itu Gender Equality?')
+st.write('Gender equality tercapai ketika semua individu, tanpa memandang jenis kelamin, memiliki hak yang sama, tanggung jawab yang sama, dan kesempatan yang sama. Hal ini melibatkan upaya untuk mengubah struktur sosial yang mempertahankan ketidaksetaraan kekuasaan antara perempuan dan laki-laki, dengan tujuan menciptakan distribusi yang lebih adil dari nilai dan prioritas antara kedua kelompok tersebut. Dengan demikian, diharapkan tercipta kehidupan yang lebih baik dan sejalan bagi semua individu.')
+
+'\n'
+st.subheader('About Gender Inequality Index (GII)')
+st.write('GII (Indeks Ketimpangan Gender) adalah metrik gabungan yang mengukur ketimpangan gender menggunakan tiga dimensi: kesehatan reproduksi, pemberdayaan, dan pasar tenaga kerja. Rentang nilai GII adalah dari 0, di mana perempuan dan laki-laki memiliki kesetaraan, hingga 1, di mana salah satu gender mengalami kondisi yang paling buruk dalam semua dimensi yang diukur.')
+
+'\n'
+st.subheader('Apa itu Human Development?')
+st.write('Human Development merujuk pada proses meningkatkan kesejahteraan dan kapabilitas individu, dengan fokus pada kesehatan, pendidikan, dan kualitas hidup secara keseluruhan.')
+
+'\n'
+'\n'
 
 # Human Development
 st.subheader('Human Development')
@@ -304,21 +333,27 @@ df_clean['region'] = df_clean['country'].map(country_to_region)
 
 
 # Gender Inequality Index by Region
+# Gender Inequality Index by Region
+# Gender Inequality Index by Region
+# Gender Inequality Index by Region
 st.subheader('Gender Inequality Index by Region')
 dv2 = df_clean.groupby(['region'])['gii value'].mean().to_frame().reset_index()
-fig = px.pie(dv2, values='gii value', names='region', hole=0.4, color='region',
-             color_discrete_sequence=color_palette)
+dv2['color'] = ['blue' if r == 'Sub-Saharan Africa' else 'gray' for r in dv2['region']]
+fig = px.pie(dv2, values='gii value', names='region', hole=0.4,
+             color='color', color_discrete_map={'blue': 'blue', 'gray': 'lightgray'},
+             labels={'region': 'Region', 'gii value': 'GII Value'})
 fig.update_traces(textposition='inside', textinfo='percent+label')
-fig.update_layout(
-    showlegend=False
-)
+fig.update_layout(showlegend=False)
 st.plotly_chart(fig, use_container_width=True)
+
+
+
 
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
-# Scatter plot
-st.subheader('Scatter plot')
+# Melihat Korelasi
+st.subheader('Melihat Korelasi')
 x_label = st.selectbox('Select x-axis:', df_clean.columns[2:])
 y_label = st.selectbox('Select y-axis:', df_clean.columns[2:])
 scatter_plot = px.scatter(df_clean, x=x_label, y=y_label, color='region',
@@ -331,45 +366,42 @@ scatter_plot.update_layout(
 st.set_option('deprecation.showPyplotGlobalUse', False)
 st.plotly_chart(scatter_plot, use_container_width=True)
 
-# Box plot
-st.subheader('Box plot')
-boxplot_column = st.selectbox('Select column:', df_clean.columns[2:])
-box_plot = px.box(df_clean, x='region', y=boxplot_column, color='region',
-                  color_discrete_sequence=px.colors.qualitative.Pastel1)
-box_plot.update_layout(
-    xaxis=dict(title='Region'),
-    yaxis=dict(title=boxplot_column),
-    showlegend=False
-)
-st.set_option('deprecation.showPyplotGlobalUse', False)
-st.plotly_chart(box_plot, use_container_width=True)
 
+'\n'
+'\n'
 
 
 # Visualisasi Gender Inequality Index by Country
 st.subheader('Gender Inequality Index by Country')
 fig = px.choropleth(df_clean, locations='country', locationmode='country names', color='gii value',
-                    hover_data=['gii value', 'region'], title='Gender Inequality Index by Country',
+                    hover_data=['gii value', 'region'], 
                     color_continuous_scale='Viridis')
 
 fig.update_layout(
-    title='Gender Inequality Index by Country',
+    
     geo=dict(showframe=False, showcoastlines=False, projection_type='equirectangular')
 )
 
 st.plotly_chart(fig)
+
+st.write('Wilayah Amerika Utara dan Eropa, serta Asia Tengah, didominasi oleh negara-negara dengan tingkat pembangunan manusia yang sangat tinggi. Hal ini disebabkan oleh rendahnya nilai GII, yang menunjukkan kesenjangan gender yang lebih kecil. Di sisi lain, Afrika Sub-Sahara memiliki tingkat human development yang rendah karena nilai GII yang tinggi.')
+
+'\n'
 
 # Visualisasi Trend of Female and Male Labor Force Participation
 st.subheader('Trend of Female and Male Labor Force Participation')
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=df_clean['country'], y=df_clean['f_labour_force'], mode='lines', name='Female Labor Force'))
 fig.add_trace(go.Scatter(x=df_clean['country'], y=df_clean['m_labour_force'], mode='lines', name='Male Labor Force'))
-fig.update_layout(title='Trend of Female and Male Labor Force Participation',
+fig.update_layout(
                   xaxis_title='Country', yaxis_title='Labor Force Participation')
 st.plotly_chart(fig)
 
 # Keterangan Visualisasi Trend of Female and Male Labor Force Participation
 st.write("Berdasarkan grafik di atas, dapat dilihat bahwa proporsi penduduk usia kerja (usia 15 tahun ke atas) yang terlibat dalam pasar tenaga kerja, baik dengan bekerja atau mencari pekerjaan pada tahun 2021 di dominasi jumlahnya oleh laki-laki. Secara garis besar, dapat dilihat bahwa ada ketimpangan dalam jumlah persentase partisipasi angkatan kerja. Nilai persentase paling rendah dimiliki oleh female labour negara Yemen sebesar 5.9. Sedangkan persentase tertinggi dimiliki oleh male labour negara Qatar sebesar 95.4.")
+
+'\n'
+'\n'
 
 # Visualisasi Trend of Female and Male Secondary Education Participation
 st.subheader('Trend of Female and Male Secondary Education Participation')
@@ -383,7 +415,8 @@ st.plotly_chart(fig)
 # Keterangan Visualisasi Trend of Female and Male Secondary Education Participation
 st.write("Berdasarkan grafik di atas, dapat dilihat bahwa secara garis besar di semua negara, perempuan yang memiliki pendidikan menengah (secondary education) jumlahnya lebih sedikit hingga menyamai jumlah laki-laki yang memiliki pendidikan tersebut. Secondary education disini merujuk pada tingkat pendidikan yang berada di antara pendidikan dasar (misalnya, SD atau MI) dan pendidikan tinggi (seperti perguruan tinggi atau universitas). Biasanya, pendidikan menengah mencakup jenjang pendidikan seperti SMP atau MTs, SMA atau MA, dan sejenisnya")
 
-
+'\n'
+'\n'
 
 # Correlation Heatmap
 st.subheader('Correlation Heatmap')
@@ -398,7 +431,7 @@ df_clean['human development'] = df_clean['human development'].map(mapping_hd)
 
 columns_to_exclude = ['hdi rank', 'country', 'gii rank', 'region']  # Kolom yang ingin dikecualikan
 
-# Menghapus kolom yang tidak diinginkan dari DataFrame
+
 # Menghapus kolom yang tidak diinginkan dari DataFrame
 corr_matrix = df_clean.drop(columns=columns_to_exclude).corr()
 
@@ -440,21 +473,21 @@ st.write("   - human development dan f_secondary_edu: 0.84")
 st.write("   - human development dan m_secondary_edu: 0.8")
 
 
-# Table
-st.subheader('Data Table')
-st.dataframe(df_clean)
 
 # Data Modeling
 # Load the saved model
-model = joblib.load('/Users/keiziapurba/random_forest_model.pkl')
+model = joblib.load('/Users/keiziapurba/xgb_model.pkl')
 
 # Streamlit App
-
+'\n'
+'\n'
 # Title
-st.title('Gender Inequality Index Prediction')
+st.title('Human Development Category Prediction')
+
+'\n'
 
 # Input form
-st.header('Input Features')
+st.subheader('Input Features')
 gii_value = st.number_input('GII Value')
 maternal_mortality_ratio = st.number_input('Maternal Mortality Ratio')
 adolescent_birth_rate = st.number_input('Adolescent Birth Rate')
@@ -500,9 +533,13 @@ prediction = model.predict(input_df)
 prediction_labels = ['Low', 'Medium', 'High', 'Very High']
 prediction_label = prediction_labels[prediction[0]]
 
+'\n'
+
 # Display the prediction
 st.subheader('Prediction')
-st.write('Predicted Human Development Index:', prediction_label)
+st.write('Human Development category:', prediction_label)
+
+'\n'
 
 # About
 st.sidebar.subheader('About')
@@ -534,3 +571,64 @@ st.sidebar.markdown(
     "</div>",
     unsafe_allow_html=True
 )
+
+'\n'
+'\n'
+
+
+# Findings
+st.subheader('What Can We Do?')
+st.write("- Stop stereotipe peran laki-laki dan perempuan")
+st.write("- Stop pernikahan anak dan pelecehan seksual")
+st.write("- Talk to women and girls")
+st.write("- Give proper value to ‘women’s work’")
+st.write("- Menghentikan penggunaan bahasa seksis dan diskriminatif")
+
+'\n'
+'\n'
+'\n'
+'\n'
+'\n'
+'\n'
+
+
+# Daftar sumber
+sources = [
+    {
+        "name": "Victoria State Government",
+        "link": "https://www.vic.gov.au/gender-equality-what-it-and-why-do-we-need-it#"
+    },
+    {
+        "name": "Council of Europe",
+        "link": "https://www.coe.int/en/web/gender-matters/gender-equality-and-gender-mainstreaming"
+    },
+    {
+        "name": "United Nations Development Programme (UNDP)",
+        "link": "https://hdr.undp.org/data-center/thematic-composite-indices/gender-inequality-index#/indicies/GII"
+    },
+    {
+        "name": "World Health Organization (WHO)",
+        "link": "https://www.who.int/data/nutrition/nlis/info/gender-inequality-index-(gii)"
+    },
+    {
+        "name": "The Guardian",
+        "link": "https://www.theguardian.com/global-development-professionals-network/2016/mar/14/gender-equality-women-girls-rights-education-empowerment-politics"
+    },
+    {
+        "name": "Government of Newfoundland and Labrador",
+        "link": "https://www.gov.nl.ca/vpi/tips-and-tools/tips-for-youth-to-prevent-gender-based-violence-and-inequality/"
+    },
+    {
+        "name": "United Nations Development Programme (UNDP)",
+        "link": "https://hdr.undp.org/data-center/documentation-and-downloads"
+    }
+]
+
+
+# Menampilkan daftar sumber dengan tulisan kecil
+st.markdown("<h3>Sources:</h3>", unsafe_allow_html=True)
+for i, source in enumerate(sources):
+    st.markdown(
+        f"{i+1}. [<span style='font-size:small'>{source['name']}</span>]({source['link']})",
+        unsafe_allow_html=True
+    )
