@@ -333,9 +333,6 @@ df_clean['region'] = df_clean['country'].map(country_to_region)
 
 
 # Gender Inequality Index by Region
-# Gender Inequality Index by Region
-# Gender Inequality Index by Region
-# Gender Inequality Index by Region
 st.subheader('Gender Inequality Index by Region')
 dv2 = df_clean.groupby(['region'])['gii value'].mean().to_frame().reset_index()
 dv2['color'] = ['blue' if r == 'Sub-Saharan Africa' else 'gray' for r in dv2['region']]
@@ -366,7 +363,9 @@ scatter_plot.update_layout(
 st.set_option('deprecation.showPyplotGlobalUse', False)
 st.plotly_chart(scatter_plot, use_container_width=True)
 
+'\n'
 
+st.write('Melalui visualisasi scatter plot diatas, dapat diketahui korelasi antar semua fitur. Salah satunya adalah korelasi antar maternal mortality ratio dan gii value yang memiliki korelasi sangat kuat. Hal ini menunjukkan bahwa apabila jumlah maternal mortality ratio meningkat, maka jumlah gii value pun akan meningkat.')
 '\n'
 '\n'
 
@@ -504,6 +503,9 @@ region_north_america = st.checkbox('Region: North America')
 region_south_asia = st.checkbox('Region: South Asia')
 region_sub_saharan_africa = st.checkbox('Region: Sub-Saharan Africa')
 
+
+
+
 # Prepare input data
 input_data = {
     'gii value': gii_value,
@@ -533,11 +535,20 @@ prediction = model.predict(input_df)
 prediction_labels = ['Low', 'Medium', 'High', 'Very High']
 prediction_label = prediction_labels[prediction[0]]
 
+
+
 '\n'
 
 # Display the prediction
 st.subheader('Prediction')
 st.write('Human Development category:', prediction_label)
+
+
+'\n'
+
+st.write("Prediksi diatas menggunakan model machine learning dengan algoritma XGBoost dengan skor precision pada test data sebesar 76% dan pada train data sebesar 95%. Model ini memiliki skor terbaik ketimbang model lainnya (Random Forest, KNN, dan Decision Tree).")
+
+
 
 '\n'
 
